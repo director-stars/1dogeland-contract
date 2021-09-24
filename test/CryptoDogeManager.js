@@ -69,7 +69,7 @@ contract('test CryptoDogeManager', async([alice, bob, admin, dev, minter]) => {
 
         console.log('balance_A', await balance_A.toString());
         
-        let result = await this.cryptoDogeController.fight(tokenId, alice, 90);
+        let result = await this.cryptoDogeController.fight(tokenId, alice, 0, false);
         console.log(result);
         let claimTokenAmount = await this.cryptoDogeController.claimTokenAmount(alice);
         console.log('claimTokenAmount', claimTokenAmount.toString());
@@ -80,7 +80,7 @@ contract('test CryptoDogeManager', async([alice, bob, admin, dev, minter]) => {
 
         console.log('balance_B', balance_A.toString());
 
-        result = await this.cryptoDogeController.fight(tokenId, alice, 90);
+        result = await this.cryptoDogeController.fight(tokenId, alice, 0, true);
 
         console.log(result)
 
