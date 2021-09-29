@@ -18,76 +18,85 @@ contract CryptoDogeManager is Ownable{
 
     uint256 public priceEgg;
     address public feeAddress;
+    uint256 public divPercent;
+    uint256 public feeMarketRate;
+    uint256 public feeChangeTribe;
+    uint256 public loseRate;
+    uint256 public feeEvolve;
 
     constructor () {
-        priceEgg = 9999;
+        feeAddress = address(0x100B112CC0328dB0746b4eE039803e4fDB96C34d);
+        priceEgg = 9999000000000000000000;
+        // priceEgg = 9999;
+        divPercent = 100;
+        feeMarketRate = 5;
     }
 
-    function addBattlefields(address _address) external onlyOwner {
+    function addBattlefields(address _address) public onlyOwner {
         require(!battlefields[_address], "Already exist battlefield");
         battlefields[_address] = true;
     }
 
-    function addEvolvers(address _address) external onlyOwner {
+    function addEvolvers(address _address) public onlyOwner {
         require(!evolvers[_address], "Already exist evolver");
         evolvers[_address] = true;
     }
 
-    function addMarkets(address _address) external onlyOwner {
+    function addMarkets(address _address) public onlyOwner {
         require(!markets[_address], "Already exist market");
         markets[_address] = true;
     }
 
-    function addFarmOwners(address _address) external onlyOwner {
+    function addFarmOwners(address _address) public onlyOwner {
         require(!farmOwners[_address], "Already exist farmOwner");
         farmOwners[_address] = true;
     }
 
-    function timesBattle(uint256 level) external view returns (uint256){
+    function timesBattle(uint256 level) public view returns (uint256){
         return 0;
     }
 
-    function timeLimitBattle() external view returns (uint256){
+    function timeLimitBattle() public view returns (uint256){
         return 0;
     }
 
-    function generation() external view returns (uint256){
+    function generation() public view returns (uint256){
         return 0;
     }
 
-    function xBattle() external view returns (uint256){
+    function xBattle() public view returns (uint256){
         return 0;
     }
 
-    function setPriceEgg(uint256 newPrice) external onlyOwner {
+    function setPriceEgg(uint256 newPrice) public onlyOwner {
         priceEgg = newPrice;
     }
 
-    function divPercent() external view returns (uint256){
+    function setDivPercent(uint256 _divPercent) public onlyOwner {
+        divPercent = _divPercent;
+    }
+
+    function feeUpgradeGeneration() public view returns (uint256){
         return 0;
     }
 
-    function feeUpgradeGeneration() external view returns (uint256){
-        return 0;
+    function setFeeChangeTribe(uint256 _feeChangeTribe) public onlyOwner{
+        feeChangeTribe = _feeChangeTribe;
     }
 
-    function feeChangeTribe() external view returns (uint256){
-        return 0;
+    function setFeeMarketRate(uint256 _feeMarketRate) public onlyOwner{
+        feeMarketRate = _feeMarketRate;
     }
 
-    function feeMarketRate() external view returns (uint256){
-        return 0;
+    function setLoseRate(uint256 _loseRate) public onlyOwner {
+        loseRate = _loseRate;
     }
 
-    function loseRate() external view returns (uint256){
-        return 0;
+    function setFeeEvolve(uint256 _feeEvolve) public onlyOwner {
+        feeEvolve = _feeEvolve;
     }
 
-    function feeEvolve() external view returns (uint256){
-        return 0;
-    }
-
-    function setFeeAddress(address _address) external onlyOwner {
+    function setFeeAddress(address _address) public onlyOwner {
         feeAddress = _address;
     }
 

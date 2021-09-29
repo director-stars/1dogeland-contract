@@ -7,31 +7,10 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/EnumerableSet.sol";
-
-interface ICryptoDogeNFT{
-    function layEgg(address receiver, uint8[] memory tribe) external;
-    function priceEgg() external returns(uint256);
-    function balanceOf(address owner) external view returns(uint256);
-    function evolve(uint256 _tokenId, address _owner, uint256 _dna) external;
-    function tokenOfOwnerByIndex(address _owner, uint256 index) external view returns(uint256);
-    function ownerOf(uint256 _tokenId) external view returns(address);
-    function getdoger(uint256 _tokenId) external view returns(
-        uint256 _generation,
-        uint256 _tribe,
-        uint256 _exp,
-        uint256 _dna,
-        uint256 _farmTime,
-        uint256 _bornTime
-    );
-    function exp(uint256 _tokenId, uint256 rewardExp) external;
-    function working(uint256 _tokenId, uint256 _time) external;
-    function dogerLevel(uint _tokenId) external view returns(uint256);
-}
+import "./ICryptoDogeNFT.sol";
 
 contract CryptoDogeController is Ownable{
     using SafeERC20 for IERC20;
-    using EnumerableSet for EnumerableSet.UintSet;
 
     struct Monster{
         string _name;
@@ -50,9 +29,8 @@ contract CryptoDogeController is Ownable{
     Monster[4] public monsters;
 
     mapping (address => uint256) public claimTokenAmount;
-    mapping (address => EnumerableSet.UintSet) private ownerTokens;
+    mapping (address => uint256) public battleTime;
 
-    event DNASet(uint256 _tokenId, uint256 _dna);
     event Fight(uint256 _tokenId, uint256 _rewardTokenAmount, uint256 _rewardExp, bool _win);
 
     constructor (){
@@ -97,30 +75,12 @@ contract CryptoDogeController is Ownable{
         cryptoDogeNFT = _nftAddress;
     }
 
-    function buyEgg(uint8[] memory tribe) public {
-        uint256 priceEgg = ICryptoDogeNFT(cryptoDogeNFT).priceEgg();
-        IERC20(token).safeTransferFrom(msg.sender, address(this), priceEgg);
-        ICryptoDogeNFT(cryptoDogeNFT).layEgg(msg.sender, tribe);
-        uint256 totalDoges = ICryptoDogeNFT(cryptoDogeNFT).balanceOf(msg.sender);
-        uint256 lastTokenId = ICryptoDogeNFT(cryptoDogeNFT).tokenOfOwnerByIndex(msg.sender, totalDoges - 1);
-        ownerTokens[msg.sender].add(lastTokenId);
-        setDNA(lastTokenId);
-    }
-
-    function setDNA(uint256 tokenId) public {
-        require(ICryptoDogeNFT(cryptoDogeNFT).ownerOf(tokenId) == msg.sender, "not own");
-        uint256 randNonce = ICryptoDogeNFT(cryptoDogeNFT).balanceOf(msg.sender);
-        uint256 dna = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, randNonce))) % 10**30;
-        ICryptoDogeNFT(cryptoDogeNFT).evolve(tokenId, msg.sender, dna);
-        emit DNASet(tokenId, dna);
-    }
-
     function fight(uint256 _tokenId, address _owner, uint256 monsterId, bool _final) public{
         require(ICryptoDogeNFT(cryptoDogeNFT).ownerOf(_tokenId) == msg.sender, "not own");
+        require(battleTime[_owner] < block.timestamp, 'not available for fighting');
         ICryptoDogeNFT mydoge = ICryptoDogeNFT(cryptoDogeNFT);
-        (,,,,uint256 farmTime,) = mydoge.getdoger(_tokenId);
         uint256 level = mydoge.dogerLevel(_tokenId);
-        require(farmTime < block.timestamp, 'not available for fighting');
+        
         fightRandNonce++;
         uint256 fightRandResult = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, fightRandNonce))) % 100;
         uint256 _rewardTokenAmount = 0;
@@ -139,9 +99,9 @@ contract CryptoDogeController is Ownable{
         else{
             emit Fight(_tokenId, _rewardTokenAmount, _rewardExp, false);
         }
-        uint256 _time = (block.timestamp - farmTime + cooldownTime);
-        if(_final)
-            mydoge.working(_tokenId, _time);
+        if(_final){
+            battleTime[_owner] = block.timestamp + cooldownTime;
+        }
     }
 
     function claimToken() public{
