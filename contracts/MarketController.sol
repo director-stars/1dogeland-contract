@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "./ICryptoDogeNFT.sol";
 
 interface ICreateCryptoDoge{
@@ -15,7 +14,6 @@ interface ICreateCryptoDoge{
 }
 contract MarketController is Ownable{
     using SafeERC20 for IERC20;
-    using EnumerableSet for EnumerableSet.UintSet;
 
     struct Doge{
         uint256 _tokenId;
@@ -36,7 +34,6 @@ contract MarketController is Ownable{
     address public cryptoDogeNFT;
     address public token;
     address public createCryptoDoge;
-    EnumerableSet.UintSet private tokenSales;
     
     constructor (){
         // token = address(0x4A8D2D2ee71c65bC837997e79a45ee9bbd360d45);

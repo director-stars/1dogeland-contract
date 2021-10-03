@@ -21,7 +21,7 @@ interface ManagerInterface {
 
     function priceEgg() external view returns (uint256);
 
-    function divPercent() external view returns (uint256);
+    function feeMarketRatePercent() external view returns (uint256);
 
     function feeUpgradeGeneration() external view returns (uint256);
 
@@ -34,4 +34,11 @@ interface ManagerInterface {
     function feeEvolve() external view returns (uint256);
 
     function feeAddress() external view returns (address);
+
+    function ownableMaxSize() external view returns (uint256);
+
+    function referralRate() external view returns (uint256);
+
+    function referralRatePercent() external view returns (uint256);
+
 }

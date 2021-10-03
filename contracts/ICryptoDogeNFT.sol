@@ -33,4 +33,7 @@ interface ICryptoDogeNFT{
     function tokenSaleOfOwnerByIndex(address _owner, uint256 index) external view returns(uint256);
     function tokenSaleByIndex(uint256 index) external view returns(uint256);
     function setApprovalForAll(address operator, bool approved) external;
+    function firstPurchaseTime(address _address) external view returns(uint256);
+    function manager() external view returns(address);
+    function setFirstPurchaseTime(address _address, uint256 _firstPurchaseTime) external;
 }

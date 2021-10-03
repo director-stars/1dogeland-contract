@@ -63,6 +63,7 @@ contract CryptoDogeNFT is ERC721 {
 
     EnumerableSet.UintSet private tokenSales;
     mapping(address => EnumerableSet.UintSet) private sellerTokens;
+    mapping(address => uint256) public firstPurchaseTime;
 
     IERC20 public dogerERC20;
 
@@ -293,17 +294,24 @@ contract CryptoDogeNFT is ERC721 {
         emit UpdatePrice(_tokenId, _msgSender(), _price);
     }
 
-    function fillOrder(uint256 _tokenId) public {
+    function fillOrder(uint256 _tokenId, address referral) public {
         require(tokenSales.contains(_tokenId), "not sale");
+        require(balanceOf(_msgSender()).add(orders(_msgSender())) < manager.ownableMaxSize(), "already have enough");
         ItemSale storage itemSale = markets[_tokenId];
         uint256 feeMarket = itemSale.price.mul(manager.feeMarketRate()).div(
-            manager.divPercent()
+            manager.feeMarketRatePercent()
         );
+        uint256 referralReward = 0;
+        if(firstPurchaseTime[_msgSender()] == 0 && referral != address(0)) {
+            firstPurchaseTime[_msgSender()] = block.timestamp;
+            referralReward = itemSale.price.mul(manager.referralRate()).div(manager.referralRatePercent());
+            dogerERC20.transferFrom(_msgSender(), referral, referralReward);
+        }
         dogerERC20.transferFrom(_msgSender(), manager.feeAddress(), feeMarket);
         dogerERC20.transferFrom(
             _msgSender(),
             itemSale.owner,
-            itemSale.price.sub(feeMarket)
+            itemSale.price.sub(feeMarket).sub(referralReward)
         );
 
         tokenOrder(_tokenId, false, 0);
@@ -362,5 +370,9 @@ contract CryptoDogeNFT is ERC721 {
     function getSale(uint256 _tokenId) public view returns (ItemSale memory) {
         if (tokenSales.contains(_tokenId)) return markets[_tokenId];
         return ItemSale({tokenId: 0, owner: address(0), price: 0});
+    }
+
+    function setFirstPurchaseTime(address _address, uint256 _firstPurchaseTime) public onlySpawner{
+        firstPurchaseTime[_address] = _firstPurchaseTime;
     }
 }

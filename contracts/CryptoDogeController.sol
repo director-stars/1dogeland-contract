@@ -11,9 +11,9 @@ import "./ICryptoDogeNFT.sol";
 
 contract CryptoDogeController is Ownable{
     using SafeERC20 for IERC20;
+    using SafeMath for uint256;
 
     struct Monster{
-        string _name;
         uint256 _hp;
         uint256 _successRate;
         uint256 _rewardTokenFrom;
@@ -38,7 +38,6 @@ contract CryptoDogeController is Ownable{
         token = address(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
         cryptoDogeNFT = address(0x100B112CC0328dB0746b4eE039803e4fDB96C34d);
         monsters[0]=Monster({
-            _name: 'Calaca Skeleton', 
             _hp: 200, 
             _successRate: 80, 
             _rewardTokenFrom: 15, 
@@ -46,7 +45,6 @@ contract CryptoDogeController is Ownable{
             _rewardExpFrom: 2, 
             _rewardExpTo: 2});
         monsters[1] = Monster({
-            _name: 'Plague Zombie', 
             _hp: 250, 
             _successRate: 70, 
             _rewardTokenFrom: 27, 
@@ -54,7 +52,6 @@ contract CryptoDogeController is Ownable{
             _rewardExpFrom: 6, 
             _rewardExpTo: 6});
         monsters[2] = Monster({
-            _name: 'Mudkin Drowner', 
             _hp: 400, 
             _successRate: 50, 
             _rewardTokenFrom: 33, 
@@ -62,7 +59,6 @@ contract CryptoDogeController is Ownable{
             _rewardExpFrom: 8, 
             _rewardExpTo: 8});
         monsters[3] = Monster({
-            _name: 'Deathlord Draugr', 
             _hp: 600, 
             _successRate: 30, 
             _rewardTokenFrom: 39, 
@@ -80,13 +76,14 @@ contract CryptoDogeController is Ownable{
         require(battleTime[_owner] < block.timestamp, 'not available for fighting');
         ICryptoDogeNFT mydoge = ICryptoDogeNFT(cryptoDogeNFT);
         uint256 level = mydoge.dogerLevel(_tokenId);
+        uint256 rare = mydoge.getRare(_tokenId);
         
         fightRandNonce++;
         uint256 fightRandResult = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, fightRandNonce))) % 100;
         uint256 _rewardTokenAmount = 0;
         uint256 _rewardExp = 0;
 
-        uint256 updatedAttackVictoryProbability = monsters[monsterId]._successRate + (100 - monsters[monsterId]._successRate) * level / 6;
+        uint256 updatedAttackVictoryProbability = monsters[monsterId]._successRate + (90 - monsters[monsterId]._successRate) * level * rare / 6 / 6;
 
         if(fightRandResult < updatedAttackVictoryProbability){
             _rewardTokenAmount = monsters[monsterId]._rewardTokenFrom + (fightRandResult % (monsters[monsterId]._rewardTokenTo - monsters[monsterId]._rewardTokenFrom + 1));
@@ -109,8 +106,7 @@ contract CryptoDogeController is Ownable{
         claimTokenAmount[msg.sender] = 0;
     }
 
-    function setMonster(uint32 _index, string memory _name, uint256 _hp, uint _successRate, uint256 _rewardTokenFrom, uint256 _rewardTokenTo, uint256 _rewardExpFrom, uint256 _rewardExpTo) public onlyOwner{
-        monsters[_index]._name = _name;
+    function setMonster(uint32 _index, uint256 _hp, uint _successRate, uint256 _rewardTokenFrom, uint256 _rewardTokenTo, uint256 _rewardExpFrom, uint256 _rewardExpTo) public onlyOwner{
         monsters[_index]._hp = _hp;
         monsters[_index]._successRate = _successRate;
         monsters[_index]._rewardTokenFrom = _rewardTokenFrom;
