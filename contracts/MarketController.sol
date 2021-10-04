@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./ICryptoDogeNFT.sol";
 
-interface ICreateCryptoDoge{
+interface ICryptoDogeController{
     function getClassInfo(uint256 _tokenId) external view returns(uint256);
 }
 contract MarketController is Ownable{
@@ -33,7 +33,7 @@ contract MarketController is Ownable{
 
     address public cryptoDogeNFT;
     address public token;
-    address public createCryptoDoge;
+    address public cryptoDogeController;
     
     constructor (){
         // token = address(0x4A8D2D2ee71c65bC837997e79a45ee9bbd360d45);
@@ -45,12 +45,8 @@ contract MarketController is Ownable{
         cryptoDogeNFT = _nftAddress;
     }
 
-    function setCreateCryptoDoge(address _address) public onlyOwner{
-        createCryptoDoge = _address;
-    }
-
-    function withdraw(address _address, uint256 amount) public onlyOwner{
-        IERC20(token).safeTransfer(_address, amount);
+    function setCryptoDogeController(address _address) public onlyOwner{
+        cryptoDogeController = _address;
     }
 
     function getDogesInfo(uint256[] memory ids) public view returns(Doge[] memory){
@@ -74,12 +70,12 @@ contract MarketController is Ownable{
             else
                 doges[i]._owner = ICryptoDogeNFT(cryptoDogeNFT).ownerOf(ids[i]);
             doges[i]._salePrice = price;
-            doges[i]._classInfo = ICreateCryptoDoge(createCryptoDoge).getClassInfo(ids[i]);
+            doges[i]._classInfo = ICryptoDogeController(cryptoDogeController).getClassInfo(ids[i]);
         }
         return doges;
     }
 
-    function getDogeOfSaleByOwner() public view returns(Doge[] memory){
+    function getDogeOfSaleByOwner() public returns(Doge[] memory){
         uint256 totalDoges = ICryptoDogeNFT(cryptoDogeNFT).orders(msg.sender);
         uint256[] memory ids = new uint256[](totalDoges);
         uint256 i = 0;

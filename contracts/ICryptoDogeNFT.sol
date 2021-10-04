@@ -36,4 +36,5 @@ interface ICryptoDogeNFT{
     function firstPurchaseTime(address _address) external view returns(uint256);
     function manager() external view returns(address);
     function setFirstPurchaseTime(address _address, uint256 _firstPurchaseTime) external;
+    function setClassInfo(uint256 _tokenId, uint256 _classInfo) external;
 }

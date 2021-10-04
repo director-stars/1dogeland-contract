@@ -3,7 +3,7 @@ const { BN, ether, balance } = require('openzeppelin-test-helpers');
 const CryptoDogeManager = artifacts.require('CryptoDogeManager')
 const CryptoDogeController = artifacts.require('CryptoDogeController');
 const CryptoDogeNFT = artifacts.require('CryptoDogeNFT')
-// const CreateCryptoDoge = artifacts.require('CreateCryptoDoge')
+const CreateCryptoDoge = artifacts.require('CreateCryptoDoge')
 const MarketController = artifacts.require('MarketController')
 const ForceSend = artifacts.require('ForceSend');
 const oneDogeABI = require('./abi/oneDoge');
@@ -31,7 +31,7 @@ contract('test CryptoDogeManager', async([alice, bob, admin, dev, minter]) => {
 
         this.cryptoDogeController = await CryptoDogeController.new({ from: alice });
 
-        // this.createCryptoDoge = await CreateCryptoDoge.new({ from: alice });
+        this.createCryptoDoge = await CreateCryptoDoge.new({ from: alice });
         
         this.marketController = await MarketController.new({ from: alice });
     });
@@ -44,14 +44,14 @@ contract('test CryptoDogeManager', async([alice, bob, admin, dev, minter]) => {
         // await this.cryptoDogeManager.addEvolvers(this.cryptoDogeNFT.address);
         await this.cryptoDogeController.setCryptoDogeNFT(this.cryptoDogeNFT.address);
 
-        await this.cryptoDogeManager.addEvolvers(this.cryptoDogeController.address);
-        // await this.createCryptoDoge.setCryptoDogeNFT(this.cryptoDogeNFT.address);
+        await this.cryptoDogeManager.addEvolvers(this.createCryptoDoge.address);
+        await this.createCryptoDoge.setCryptoDogeNFT(this.cryptoDogeNFT.address);
         // await this.createCryptoDoge.setManager(this.cryptoDogeManager.address);
 
         await this.marketController.setCryptoDogeNFT(this.cryptoDogeNFT.address);
-        await this.marketController.setCryptoDogeController(this.cryptoDogeController.address);
+        await this.marketController.setCreateCryptoDoge(this.createCryptoDoge.address);
 
-        console.log(await this.cryptoDogeController.cryptoDogeNFT());
+        console.log(await this.createCryptoDoge.cryptoDogeNFT());
 
         const forceSend = await ForceSend.new();
         await forceSend.go(oneDogeOwner, { value: ether('1') });
@@ -70,10 +70,10 @@ contract('test CryptoDogeManager', async([alice, bob, admin, dev, minter]) => {
         let tribe = Math.floor(Math.random() * 4);
         console.log('tribe', tribe);
         // console.log(this.cryptoDogeController.address)
-        await oneDogeContract.methods.approve(this.cryptoDogeController.address, priceEgg).send({ from : alice});
-        let egg = await this.cryptoDogeController.buyEgg([tribe], bob, { from : alice });
-        await oneDogeContract.methods.approve(this.cryptoDogeController.address, priceEgg).send({ from : admin});
-        await this.cryptoDogeController.buyEgg([tribe], bob, { from : admin });
+        await oneDogeContract.methods.approve(this.createCryptoDoge.address, priceEgg).send({ from : alice});
+        let egg = await this.createCryptoDoge.buyEgg([tribe], bob, { from : alice });
+        await oneDogeContract.methods.approve(this.createCryptoDoge.address, priceEgg).send({ from : admin});
+        await this.createCryptoDoge.buyEgg([tribe], bob, { from : admin });
         // console.log(egg.logs[0].args);
         let cryptoDoges = await this.cryptoDogeNFT.balanceOf(alice);
         let cryptoDoges_1 = await this.cryptoDogeNFT.balanceOf(admin);
@@ -81,8 +81,8 @@ contract('test CryptoDogeManager', async([alice, bob, admin, dev, minter]) => {
         console.log('cryptoDoges', cryptoDoges.toString());
         let tokenId = await this.cryptoDogeNFT.tokenOfOwnerByIndex(alice, parseInt(cryptoDoges.toString())-1);
         let tokenId_1 = await this.cryptoDogeNFT.tokenOfOwnerByIndex(admin, parseInt(cryptoDoges_1.toString())-1);
-        await this.cryptoDogeController.setDNA(tokenId, { from : alice });
-        await this.cryptoDogeController.setDNA(tokenId_1, { from : admin });
+        await this.createCryptoDoge.setDNA(tokenId, { from : alice });
+        await this.createCryptoDoge.setDNA(tokenId_1, { from : admin });
         console.log(parseInt(tokenId.toString()));
 
         let balance_A = await oneDogeContract.methods.balanceOf(alice).call();
