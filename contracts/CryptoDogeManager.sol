@@ -16,26 +16,30 @@ contract CryptoDogeManager is Ownable{
     mapping (address => bool) public farmOwners;
     mapping (address => bool) public battlefields;
 
-    uint256 public priceEgg;
+    uint256 public priceDoge;
     address public feeAddress;
     uint256 public feeMarketRatePercent;
     uint256 public feeMarketRate;
     uint256 public feeChangeTribe;
-    uint256 public loseRate;
+    // uint256 public loseRate;
     uint256 public feeEvolve;
     uint256 public ownableMaxSize;
     uint256 public referralRate;
     uint256 public referralRatePercent;
+    uint256 public nftMaxSize;
+    uint256 public priceStone;
 
     constructor () {
         feeAddress = address(0x67926b0C4753c42b31289C035F8A656D800cD9e7);
-        // priceEgg = 9999000000000000000000;
-        priceEgg = 9999;
+        // priceDoge = 9999000000000000000000;
+        priceDoge = 9999;
         feeMarketRate = 5;
         feeMarketRatePercent = 100;
         ownableMaxSize = 5;
         referralRate = 10;
         referralRatePercent = 100;
+        nftMaxSize = 6000;
+        priceStone = 2000;
     }
 
     function addBattlefields(address _address) public onlyOwner {
@@ -58,24 +62,24 @@ contract CryptoDogeManager is Ownable{
         farmOwners[_address] = true;
     }
 
-    function timesBattle(uint256 level) public view returns (uint256){
-        return 0;
-    }
+    // function timesBattle(uint256 level) public view returns (uint256){
+    //     return 0;
+    // }
 
-    function timeLimitBattle() public view returns (uint256){
-        return 0;
-    }
+    // function timeLimitBattle() public view returns (uint256){
+    //     return 0;
+    // }
 
     function generation() public view returns (uint256){
         return 0;
     }
 
-    function xBattle() public view returns (uint256){
-        return 0;
-    }
+    // function xBattle() public view returns (uint256){
+    //     return 0;
+    // }
 
-    function setPriceEgg(uint256 newPrice) public onlyOwner {
-        priceEgg = newPrice;
+    function setPriceDoge(uint256 newPrice) public onlyOwner {
+        priceDoge = newPrice;
     }
 
     function feeUpgradeGeneration() public view returns (uint256){
@@ -101,9 +105,14 @@ contract CryptoDogeManager is Ownable{
         ownableMaxSize = _ownableMaxSize;
     }
 
-    function setLoseRate(uint256 _loseRate) public onlyOwner {
-        loseRate = _loseRate;
+    function setNFTMaxSize(uint256 _nftMaxSize) public onlyOwner{
+        assert(_nftMaxSize > 0);
+        nftMaxSize = _nftMaxSize;
     }
+
+    // function setLoseRate(uint256 _loseRate) public onlyOwner {
+    //     loseRate = _loseRate;
+    // }
 
     function setFeeEvolve(uint256 _feeEvolve) public onlyOwner {
         feeEvolve = _feeEvolve;
@@ -121,5 +130,10 @@ contract CryptoDogeManager is Ownable{
     function setReferralRatePercent(uint256 _referralRatePercent) public onlyOwner {
         assert(_referralRatePercent >= 100);
         referralRatePercent = _referralRatePercent;
+    }
+
+    function setPriceStone(uint256 _priceStone) public onlyOwner {
+        assert(_priceStone > 0);
+        priceStone = _priceStone;
     }
 }

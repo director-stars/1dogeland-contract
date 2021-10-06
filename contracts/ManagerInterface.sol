@@ -11,15 +11,15 @@ interface ManagerInterface {
 
     function farmOwners(address _address) external view returns (bool);
 
-    function timesBattle(uint256 level) external view returns (uint256);
+    // function timesBattle(uint256 level) external view returns (uint256);
 
-    function timeLimitBattle() external view returns (uint256);
+    // function timeLimitBattle() external view returns (uint256);
 
     function generation() external view returns (uint256);
 
-    function xBattle() external view returns (uint256);
+    // function xBattle() external view returns (uint256);
 
-    function priceEgg() external view returns (uint256);
+    function priceDoge() external view returns (uint256);
 
     function feeMarketRatePercent() external view returns (uint256);
 
@@ -29,7 +29,7 @@ interface ManagerInterface {
 
     function feeMarketRate() external view returns (uint256);
 
-    function loseRate() external view returns (uint256);
+    // function loseRate() external view returns (uint256);
 
     function feeEvolve() external view returns (uint256);
 
@@ -41,4 +41,7 @@ interface ManagerInterface {
 
     function referralRatePercent() external view returns (uint256);
 
+    function nftMaxSize() external view returns (uint256);
+
+    function priceStone() external view returns (uint256);
 }

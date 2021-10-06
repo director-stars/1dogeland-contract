@@ -19,7 +19,7 @@ contract CryptoDogeNFT is ERC721 {
         GRASS
     }
 
-    event LayEgg(uint256 indexed tokenId, address buyer);
+    event LayDoge(uint256 indexed tokenId, address buyer);
     event Evolve(uint256 indexed tokenId, uint256 dna);
     event Buy(
         uint256 indexed tokenId,
@@ -91,8 +91,8 @@ contract CryptoDogeNFT is ERC721 {
         _;
     }
 
-    function priceEgg() public view returns (uint256) {
-        return manager.priceEgg();
+    function priceDoge() public view returns (uint256) {
+        return manager.priceDoge();
     }
 
     function feeEvolve() public view returns (uint256) {
@@ -172,20 +172,20 @@ contract CryptoDogeNFT is ERC721 {
         emit UpgradeGeneration(_tokenId, _generation);
     }
 
-    function layEgg(address receiver, Tribe[] memory tribes)
+    function layDoge(address receiver, Tribe[] memory tribes)
         external
         onlySpawner
     {
         uint256 amount = tribes.length;
         require(amount > 0, "require: >0");
-        if (amount == 1) _layEgg(receiver, tribes[0]);
+        if (amount == 1) _layDoge(receiver, tribes[0]);
         else
             for (uint256 index = 0; index < amount; index++) {
-                _layEgg(receiver, tribes[index]);
+                _layDoge(receiver, tribes[index]);
             }
     }
 
-    function _layEgg(address receiver, Tribe tribe) internal {
+    function _layDoge(address receiver, Tribe tribe) internal {
         uint256 nextTokenId = _getNextTokenId();
         _mint(receiver, nextTokenId);
 
@@ -198,7 +198,7 @@ contract CryptoDogeNFT is ERC721 {
             bornTime: block.timestamp
         });
 
-        emit LayEgg(nextTokenId, receiver);
+        emit LayDoge(nextTokenId, receiver);
     }
 
     /**

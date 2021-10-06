@@ -21,8 +21,8 @@ interface ICryptoDogeNFT{
     );
     function isEvolved(uint256 _tokenId) external view returns(bool);
     function tokenOfOwnerByIndex(address _owner, uint256 index) external view returns(uint256);
-    function layEgg(address receiver, uint8[] memory tribe) external;
-    function priceEgg() external returns(uint256);
+    function layDoge(address receiver, uint8[] memory tribe) external;
+    function priceDoge() external returns(uint256);
     function evolve(uint256 _tokenId, address _owner, uint256 _dna) external;
     function getRare(uint256 _tokenId) external view returns(uint256);
     function exp(uint256 _tokenId, uint256 rewardExp) external;
@@ -37,4 +37,5 @@ interface ICryptoDogeNFT{
     function manager() external view returns(address);
     function setFirstPurchaseTime(address _address, uint256 _firstPurchaseTime) external;
     function setClassInfo(uint256 _tokenId, uint256 _classInfo) external;
+    function totalSupply() external view returns(uint256);
 }

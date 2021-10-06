@@ -6,14 +6,14 @@ pragma abicoder v2;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./ICryptoDogeNFT.sol";
 
 interface ICryptoDogeController{
     function getClassInfo(uint256 _tokenId) external view returns(uint256);
+    function battleTime(uint256 _tokenId) external view returns(uint256);
+    function autoFightStoneInfo(uint256 _tokenId) external view returns(uint256);
 }
 contract MarketController is Ownable{
-    using SafeERC20 for IERC20;
 
     struct Doge{
         uint256 _tokenId;
@@ -29,16 +29,16 @@ contract MarketController is Ownable{
         uint256 _salePrice;
         address _owner;
         uint256 _classInfo;
+        uint256 _battleTime;
+        uint256 _stoneInfo;
     }
 
     address public cryptoDogeNFT;
-    address public token;
     address public cryptoDogeController;
     
     constructor (){
-        // token = address(0x4A8D2D2ee71c65bC837997e79a45ee9bbd360d45);
-        token = address(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
         cryptoDogeNFT = address(0x100B112CC0328dB0746b4eE039803e4fDB96C34d);
+        cryptoDogeController = address(0x100B112CC0328dB0746b4eE039803e4fDB96C34d);
     }
 
     function setCryptoDogeNFT(address _nftAddress) public onlyOwner{
@@ -71,11 +71,13 @@ contract MarketController is Ownable{
                 doges[i]._owner = ICryptoDogeNFT(cryptoDogeNFT).ownerOf(ids[i]);
             doges[i]._salePrice = price;
             doges[i]._classInfo = ICryptoDogeController(cryptoDogeController).getClassInfo(ids[i]);
+            doges[i]._battleTime = ICryptoDogeController(cryptoDogeController).battleTime(ids[i]);
+            doges[i]._stoneInfo = ICryptoDogeController(cryptoDogeController).autoFightStoneInfo(ids[i]);
         }
         return doges;
     }
 
-    function getDogeOfSaleByOwner() public returns(Doge[] memory){
+    function getDogeOfSaleByOwner() public view returns(Doge[] memory){
         uint256 totalDoges = ICryptoDogeNFT(cryptoDogeNFT).orders(msg.sender);
         uint256[] memory ids = new uint256[](totalDoges);
         uint256 i = 0;

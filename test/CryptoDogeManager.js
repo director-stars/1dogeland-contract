@@ -3,7 +3,7 @@ const { BN, ether, balance } = require('openzeppelin-test-helpers');
 const CryptoDogeManager = artifacts.require('CryptoDogeManager')
 const CryptoDogeController = artifacts.require('CryptoDogeController');
 const CryptoDogeNFT = artifacts.require('CryptoDogeNFT')
-// const CreateCryptoDoge = artifacts.require('CreateCryptoDoge')
+const MagicStoneNFT = artifacts.require('MagicStoneNFT')
 const MarketController = artifacts.require('MarketController')
 const ForceSend = artifacts.require('ForceSend');
 const oneDogeABI = require('./abi/oneDoge');
@@ -29,6 +29,14 @@ contract('test CryptoDogeManager', async([alice, bob, admin, dev, minter]) => {
             from: alice
         });
 
+        this.magicStoneNFT = await MagicStoneNFT.new(
+            'MagicStoneNFT',
+            'MagicStoneNFT',
+            this.cryptoDogeManager.address,
+        {
+            from: alice
+        });
+
         this.cryptoDogeController = await CryptoDogeController.new({ from: alice });
 
         // this.createCryptoDoge = await CreateCryptoDoge.new({ from: alice });
@@ -40,9 +48,10 @@ contract('test CryptoDogeManager', async([alice, bob, admin, dev, minter]) => {
         
         await this.cryptoDogeManager.addBattlefields(this.cryptoDogeController.address);
         await this.cryptoDogeManager.addMarkets(this.cryptoDogeNFT.address);
-        await this.cryptoDogeManager.setFeeAddress(this.marketController.address);
+        await this.cryptoDogeManager.setFeeAddress(this.cryptoDogeController.address);
         // await this.cryptoDogeManager.addEvolvers(this.cryptoDogeNFT.address);
         await this.cryptoDogeController.setCryptoDogeNFT(this.cryptoDogeNFT.address);
+        await this.cryptoDogeController.setMagicStoneNFT(this.magicStoneNFT.address);
 
         await this.cryptoDogeManager.addEvolvers(this.cryptoDogeController.address);
         // await this.createCryptoDoge.setCryptoDogeNFT(this.cryptoDogeNFT.address);
@@ -64,17 +73,17 @@ contract('test CryptoDogeManager', async([alice, bob, admin, dev, minter]) => {
         await oneDogeContract.methods.transfer(this.cryptoDogeController.address, '100000000000000000000').send({ from: oneDogeOwner});
         
         console.log('test');
-        let priceEgg = await this.cryptoDogeNFT.priceEgg();
-        console.log('priceEgg', priceEgg);
+        let priceDoge = await this.cryptoDogeNFT.priceDoge();
+        console.log('priceDoge', priceDoge);
 
         let tribe = Math.floor(Math.random() * 4);
         console.log('tribe', tribe);
         // console.log(this.cryptoDogeController.address)
-        await oneDogeContract.methods.approve(this.cryptoDogeController.address, priceEgg).send({ from : alice});
-        let egg = await this.cryptoDogeController.buyEgg([tribe], bob, { from : alice });
-        await oneDogeContract.methods.approve(this.cryptoDogeController.address, priceEgg).send({ from : admin});
-        await this.cryptoDogeController.buyEgg([tribe], bob, { from : admin });
-        // console.log(egg.logs[0].args);
+        await oneDogeContract.methods.approve(this.cryptoDogeController.address, priceDoge).send({ from : alice});
+        let Doge = await this.cryptoDogeController.buyDoge([tribe], bob, { from : alice });
+        await oneDogeContract.methods.approve(this.cryptoDogeController.address, priceDoge).send({ from : admin});
+        await this.cryptoDogeController.buyDoge([tribe], bob, { from : admin });
+        // console.log(Doge.logs[0].args);
         let cryptoDoges = await this.cryptoDogeNFT.balanceOf(alice);
         let cryptoDoges_1 = await this.cryptoDogeNFT.balanceOf(admin);
         
@@ -107,7 +116,7 @@ contract('test CryptoDogeManager', async([alice, bob, admin, dev, minter]) => {
         // console.log('alice', alice)
         // console.log(await this.cryptoDogeNFT.ownerOf(tokenId));
 
-        await this.cryptoDogeNFT.placeOrder(tokenId, 1000, {from: alice});
+        // await this.cryptoDogeNFT.placeOrder(tokenId, 1000, {from: alice});
         await this.cryptoDogeNFT.placeOrder(tokenId_1, 1000, {from: admin});
         console.log('result-----------')
         result = await this.marketController.getDogeOfSaleByOwner({from: alice});
@@ -119,6 +128,18 @@ contract('test CryptoDogeManager', async([alice, bob, admin, dev, minter]) => {
 
         const referral_balance = await oneDogeContract.methods.balanceOf(bob).call();
         console.log(referral_balance.toString());
+
+        let priceStone = await this.magicStoneNFT.priceStone();
+        await oneDogeContract.methods.approve(this.cryptoDogeController.address, priceStone).send({ from : alice});
+        // let owner = await this.cryptoDogeNFT.ownerOf(tokenId);
+        // console.log(owner);
+        // console.log(alice);
+        await this.cryptoDogeController.buyStone({from: alice});
+        let magicStones = await this.magicStoneNFT.balanceOf(alice);
+        let stoneTokenId = await this.magicStoneNFT.tokenOfOwnerByIndex(alice, parseInt(magicStones.toString())-1);
+        await this.cryptoDogeController.setAutoFight(tokenId, stoneTokenId, 0, { from : alice});
+        result = await this.cryptoDogeController.getAutoFightResults(tokenId, {from: alice});
+        console.log(result.logs[0].args);
 
         result = await this.cryptoDogeNFT.fillOrder(tokenId, bob, {from: admin});
         console.log('////////////////////////');
