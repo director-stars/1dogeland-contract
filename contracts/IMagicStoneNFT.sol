@@ -8,4 +8,6 @@ interface IMagicStoneNFT{
     function priceStone() external view returns (uint256);
     function burn(uint256 _tokenId, address _address) external;
     function ownerOf(uint256 _tokenId) external view returns(address);
+    function balanceOf(address _address) external view returns(uint256);
+    function tokenOfOwnerByIndex(address _address, uint256 _index) external view returns(uint256);
 }

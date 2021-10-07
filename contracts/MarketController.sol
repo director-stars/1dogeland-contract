@@ -11,7 +11,7 @@ import "./ICryptoDogeNFT.sol";
 interface ICryptoDogeController{
     function getClassInfo(uint256 _tokenId) external view returns(uint256);
     function battleTime(uint256 _tokenId) external view returns(uint256);
-    function autoFightStoneInfo(uint256 _tokenId) external view returns(uint256);
+    function setStoneTime(uint256 _tokenId) external view returns(uint256);
 }
 contract MarketController is Ownable{
 
@@ -72,7 +72,7 @@ contract MarketController is Ownable{
             doges[i]._salePrice = price;
             doges[i]._classInfo = ICryptoDogeController(cryptoDogeController).getClassInfo(ids[i]);
             doges[i]._battleTime = ICryptoDogeController(cryptoDogeController).battleTime(ids[i]);
-            doges[i]._stoneInfo = ICryptoDogeController(cryptoDogeController).autoFightStoneInfo(ids[i]);
+            doges[i]._stoneInfo = ICryptoDogeController(cryptoDogeController).setStoneTime(ids[i]);
         }
         return doges;
     }

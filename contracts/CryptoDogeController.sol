@@ -45,14 +45,12 @@ contract CryptoDogeController is Ownable{
     mapping (address => uint256) public claimTokenAmount;
     mapping (uint256 => uint256) public battleTime;
 
-    event Fight(uint256 _tokenId, uint256 _rewardTokenAmount, uint256 _rewardExp, string _win);
-
     uint256 public randFightNumberFrom = 5;
     uint256 public randFightNumberTo = 10;
-    mapping (uint256 => uint256) public autoFightStoneInfo;
+    mapping (uint256 => uint256) public setStoneTime;
     mapping (uint256 => uint256) public autoFightMonsterInfo;
     event SetAutoFight(uint256 _tokenId, uint256 _monsterId);
-    event AutoFightResult(uint256 _tokenId, uint256 _totalRewardAmount, uint256 _totalRewardExp, uint256 _winNumber, uint256 _fightNumber);
+    event Fight(uint256 _tokenId, uint256 _totalRewardAmount, uint256 _totalRewardExp, uint256 _winNumber, uint256 _fightNumber);
 
     constructor (){
         // token = address(0x4A8D2D2ee71c65bC837997e79a45ee9bbd360d45);
@@ -167,10 +165,10 @@ contract CryptoDogeController is Ownable{
 
             claimTokenAmount[_owner] = claimTokenAmount[_owner] + (_rewardTokenAmount * 10**18);
             mydoge.exp(_tokenId, _rewardExp);
-            emit Fight(_tokenId, _rewardTokenAmount, _rewardExp, 'true');
+            emit Fight(_tokenId, _rewardTokenAmount, _rewardExp, 1, 1);
         }
         else{
-            emit Fight(_tokenId, _rewardTokenAmount, _rewardExp, 'false');
+            emit Fight(_tokenId, _rewardTokenAmount, _rewardExp, 0, 1);
         }
         if(_final){
             battleTime[_tokenId] = block.timestamp + cooldownTime;
@@ -220,43 +218,53 @@ contract CryptoDogeController is Ownable{
         return monsters;
     }
     function buyStone() public {
+        ICryptoDogeNFT cryptoDoge = ICryptoDogeNFT(cryptoDogeNFT);
         IMagicStoneNFT magicStone = IMagicStoneNFT(magicStoneNFT);
+        manager = ManagerInterface(cryptoDoge.manager());
         uint256 price = magicStone.priceStone();
         IERC20(token).safeTransferFrom(_msgSender(), manager.feeAddress(), price);
         magicStone.createStone(_msgSender());
     }
-    function setAutoFight(uint256 _dogeId, uint256 _stoneId, uint256 _monsterId) public {
+    function setAutoFight(uint256 _dogeId, uint256 _monsterId) public {
         ICryptoDogeNFT dogeNFT = ICryptoDogeNFT(cryptoDogeNFT);
         IMagicStoneNFT stoneNFT = IMagicStoneNFT(magicStoneNFT);
         require(dogeNFT.ownerOf(_dogeId) == _msgSender(), 'not owner of doge');
-        require(stoneNFT.ownerOf(_stoneId) == _msgSender(), 'not owner of stone');
-        autoFightStoneInfo[_dogeId] = _stoneId;
+        uint256 stoneBalance = stoneNFT.balanceOf(_msgSender());
+        require(stoneBalance > 0, 'not have stone');
+        uint256 _stoneId = stoneNFT.tokenOfOwnerByIndex(_msgSender(), stoneBalance - 1);
+        setStoneTime[_dogeId] = block.timestamp;
         autoFightMonsterInfo[_dogeId] = _monsterId;
         stoneNFT.burn(_stoneId, _msgSender());
         emit SetAutoFight(_dogeId, _monsterId);
     }
 
     function unsetAutoFight(uint256 _dogeId) public {
-        autoFightStoneInfo[_dogeId] = 0;
+        ICryptoDogeNFT dogeNFT = ICryptoDogeNFT(cryptoDogeNFT);
+        require(dogeNFT.ownerOf(_dogeId) == _msgSender(), 'not owner of doge');
+        setStoneTime[_dogeId] = 0;
     }
 
     function getAutoFightResults(uint256 _dogeId) public{
         ICryptoDogeNFT dogeNFT = ICryptoDogeNFT(cryptoDogeNFT);
         require(dogeNFT.ownerOf(_dogeId) == _msgSender(), 'not owner of doge');
-        require(autoFightStoneInfo[_dogeId] != 0, 'not set autoFight');
+        require(setStoneTime[_dogeId] != 0, 'not set autoFight');
         uint256 lastBattleTime = battleTime[_dogeId];
         uint256 fightNumber = 0;
         uint256 winNumber = 0;
         uint256 totalRewardAmount = 0;
         uint256 totalRewardExp = 0;
-        uint256 randNonce = dogeNFT.balanceOf(_msgSender());
-        uint256 randFigntInfo = uint256(keccak256(abi.encodePacked(block.timestamp, _msgSender(), randNonce)));
+        uint256 randFigntInfo = uint256(keccak256(abi.encodePacked(block.timestamp, _msgSender(), dogeNFT.balanceOf(_msgSender()))));
         uint256 i = 0;
         uint256 monsterId = autoFightMonsterInfo[_dogeId];
         uint256 level = dogeNFT.dogerLevel(_dogeId);
         uint256 rare = dogeNFT.getRare(_dogeId);
-        if(lastBattleTime == 0) fightNumber = 10;
+        uint256 fightRandResult = 0;
+        if(block.timestamp - setStoneTime[_dogeId] < cooldownTime){
+            fightNumber = 10;
+        }
         else{
+            if(lastBattleTime == 0)
+                lastBattleTime = setStoneTime[_dogeId];
             uint256 turns = (block.timestamp - lastBattleTime).div(cooldownTime);
             for(; i < turns; i ++){
                 fightNumber.add(randFigntInfo % (randFightNumberTo - randFightNumberFrom + 1) + randFightNumberFrom);
@@ -264,7 +272,7 @@ contract CryptoDogeController is Ownable{
         }
         for(i = 0 ; i < fightNumber; i ++){
             fightRandNonce ++;
-            uint256 fightRandResult = uint256(keccak256(abi.encodePacked(block.timestamp, _msgSender(), fightRandNonce))) % 100;
+            fightRandResult = uint256(keccak256(abi.encodePacked(block.timestamp, _msgSender(), fightRandNonce))) % 100;
             uint256 updatedAttackVictoryProbability = monsters[monsterId]._successRate + (90 - monsters[monsterId]._successRate) * level * rare / 6 / 6;
 
             if(fightRandResult < updatedAttackVictoryProbability){
@@ -275,7 +283,7 @@ contract CryptoDogeController is Ownable{
         }
         claimTokenAmount[_msgSender()] = claimTokenAmount[_msgSender()] + (totalRewardAmount * 10**18);
         dogeNFT.exp(_dogeId, totalRewardExp);
-        emit AutoFightResult(_dogeId, totalRewardAmount, totalRewardExp, winNumber, fightNumber);
+        emit Fight(_dogeId, totalRewardAmount, totalRewardExp, winNumber, fightNumber);
         battleTime[_dogeId] = block.timestamp + cooldownTime;
     }
 }

@@ -135,9 +135,9 @@ contract('test CryptoDogeManager', async([alice, bob, admin, dev, minter]) => {
         // console.log(owner);
         // console.log(alice);
         await this.cryptoDogeController.buyStone({from: alice});
-        let magicStones = await this.magicStoneNFT.balanceOf(alice);
-        let stoneTokenId = await this.magicStoneNFT.tokenOfOwnerByIndex(alice, parseInt(magicStones.toString())-1);
-        await this.cryptoDogeController.setAutoFight(tokenId, stoneTokenId, 0, { from : alice});
+        // let magicStones = await this.magicStoneNFT.balanceOf(alice);
+        // let stoneTokenId = await this.magicStoneNFT.tokenOfOwnerByIndex(alice, parseInt(magicStones.toString())-1);
+        await this.cryptoDogeController.setAutoFight(tokenId, 0, { from : alice});
         result = await this.cryptoDogeController.getAutoFightResults(tokenId, {from: alice});
         console.log(result.logs[0].args);
 
