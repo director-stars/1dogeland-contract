@@ -39,7 +39,7 @@ contract CryptoDogeManager is Ownable{
         referralRate = 10;
         referralRatePercent = 100;
         nftMaxSize = 6000;
-        priceStone = 2000;
+        priceStone = 1;
     }
 
     function addBattlefields(address _address) public onlyOwner {

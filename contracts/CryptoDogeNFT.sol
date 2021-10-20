@@ -64,6 +64,7 @@ contract CryptoDogeNFT is ERC721 {
     EnumerableSet.UintSet private tokenSales;
     mapping(address => EnumerableSet.UintSet) private sellerTokens;
     mapping(address => uint256) public firstPurchaseTime;
+    mapping (address => uint256) private claimTokenAmount;
 
     IERC20 public dogerERC20;
 
@@ -374,5 +375,13 @@ contract CryptoDogeNFT is ERC721 {
 
     function setFirstPurchaseTime(address _address, uint256 _firstPurchaseTime) public onlySpawner{
         firstPurchaseTime[_address] = _firstPurchaseTime;
+    }
+
+    function getClaimTokenAmount(address _address) public view returns (uint256){
+        return claimTokenAmount[_address];
+    }
+
+    function updateClaimTokenAmount(address _address, uint256 _amount) public onlySpawner{
+        claimTokenAmount[_address] = _amount;
     }
 }

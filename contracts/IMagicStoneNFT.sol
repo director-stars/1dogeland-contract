@@ -10,4 +10,5 @@ interface IMagicStoneNFT{
     function ownerOf(uint256 _tokenId) external view returns(address);
     function balanceOf(address _address) external view returns(uint256);
     function tokenOfOwnerByIndex(address _address, uint256 _index) external view returns(uint256);
+    function totalSupply() external view returns(uint256);
 }

@@ -38,4 +38,6 @@ interface ICryptoDogeNFT{
     function setFirstPurchaseTime(address _address, uint256 _firstPurchaseTime) external;
     function setClassInfo(uint256 _tokenId, uint256 _classInfo) external;
     function totalSupply() external view returns(uint256);
+    function getClaimTokenAmount(address _address) external view returns(uint256);
+    function updateClaimTokenAmount(address _address, uint256 _newAmount) external;
 }
