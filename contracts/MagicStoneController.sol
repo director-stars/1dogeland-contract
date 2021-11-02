@@ -35,9 +35,9 @@ contract MagicStoneController is Ownable{
     address public cryptoDogeNFT;
     address public cryptoDogeController;
     address public magicStoneNFT;
+    address public feeAddress;
     ManagerInterface manager;
 
-    // uint256 public cooldownTime = 14400;
     uint256 internal fightRandNonce = 0;
     uint256 public nftMaxSize = 1000;
 
@@ -53,6 +53,7 @@ contract MagicStoneController is Ownable{
         cryptoDogeNFT = address(0x100B112CC0328dB0746b4eE039803e4fDB96C34d);
         magicStoneNFT = address(0x5968f5E2672331484e009FD24abE421948e35Dfc);
         cryptoDogeController = address(0x5968f5E2672331484e009FD24abE421948e35Dfc);
+        feeAddress = address(0x67926b0C4753c42b31289C035F8A656D800cD9e7);
     }
 
     receive() external payable {}
@@ -73,6 +74,10 @@ contract MagicStoneController is Ownable{
         nftMaxSize = _nftMaxSize;
     }
 
+    function setFeeAddress(address _feeAddress) public onlyOwner{
+        feeAddress = _feeAddress;
+    }
+
     function buyStone() external payable{
         ICryptoDogeNFT cryptoDoge = ICryptoDogeNFT(cryptoDogeNFT);
         IMagicStoneNFT magicStone = IMagicStoneNFT(magicStoneNFT);
@@ -80,7 +85,7 @@ contract MagicStoneController is Ownable{
         manager = ManagerInterface(cryptoDoge.manager());
         uint256 price = magicStone.priceStone();
         require(msg.value >= price, "MAGICSTONENFT: confirmOffer: deposited BNB is less than NFT price." );
-        (bool success,) = payable(manager.feeAddress()).call{value: price}("");
+        (bool success,) = payable(feeAddress).call{value: price}("");
         require(success, "Failed to send BNB");
         magicStone.createStone(_msgSender());
     }
@@ -98,7 +103,6 @@ contract MagicStoneController is Ownable{
     }
 
     function unsetAutoFight(uint256 _dogeId) public {
-        // IMagicStoneNFT stoneNFT = IMagicStoneNFT(magicStoneNFT);
         ICryptoDogeNFT dogeNFT = ICryptoDogeNFT(cryptoDogeNFT);
         require(dogeNFT.ownerOf(_dogeId) == _msgSender(), 'not owner of doge');
         uint256 _stoneId = dogeStoneInfo[_dogeId];
@@ -115,7 +119,6 @@ contract MagicStoneController is Ownable{
         require(setTime != 0, 'not set autoFight');
     
         (uint256 fightNumber, uint256 winNumber, uint256 totalRewardAmount, uint256 totalRewardExp) = battleResult(_dogeId);
-        // uint256 newAmount = dogeNFT.getClaimTokenAmount(_msgSender()) + (totalRewardAmount * 10**18);
         dogeNFT.updateClaimTokenAmount(_msgSender(), dogeNFT.getClaimTokenAmount(_msgSender()) + (totalRewardAmount * 10**18));
         if(totalRewardExp > 0)
             dogeNFT.exp(_dogeId, totalRewardExp);
@@ -161,7 +164,7 @@ contract MagicStoneController is Ownable{
             uint256 turns = (block.timestamp - lastBattleTime).div(dogeController.cooldownTime());
             uint256 totalFightNumber = 0;
             for(; i < turns; i ++){
-                totalFightNumber.add(randFigntInfo % (dogeController.randFightNumberTo() - dogeController.randFightNumberFrom() + 1) + dogeController.randFightNumberFrom());
+                totalFightNumber = totalFightNumber.add(randFigntInfo % (dogeController.randFightNumberTo() - dogeController.randFightNumberFrom() + 1) + dogeController.randFightNumberFrom());
             }
             fightNumber = totalFightNumber;
         }

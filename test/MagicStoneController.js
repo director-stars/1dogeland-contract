@@ -1,5 +1,5 @@
-const { BN, ether, balance } = require('openzeppelin-test-helpers');
-
+const { BN, ether, balance, time } = require('openzeppelin-test-helpers');
+// const { expectRevert, time } = require('openzeppelin/test-helpers');
 const CryptoDogeManager = artifacts.require('CryptoDogeManager')
 const CryptoDogeController = artifacts.require('CryptoDogeController');
 const CryptoDogeNFT = artifacts.require('CryptoDogeNFT')
@@ -54,7 +54,7 @@ contract('test CryptoDogeManager', async([alice, bob, admin, dev, minter]) => {
         await this.cryptoDogeManager.setFeeAddress(this.cryptoDogeController.address);
         // await this.cryptoDogeManager.addEvolvers(this.cryptoDogeNFT.address);
         await this.cryptoDogeController.setCryptoDogeNFT(this.cryptoDogeNFT.address);
-        await this.cryptoDogeController.setMagicStoneNFT(this.magicStoneNFT.address);
+        // await this.cryptoDogeController.setMagicStoneNFT(this.magicStoneNFT.address);
 
         await this.cryptoDogeManager.addEvolvers(this.cryptoDogeController.address);
         // await this.createCryptoDoge.setCryptoDogeNFT(this.cryptoDogeNFT.address);
@@ -147,6 +147,9 @@ contract('test CryptoDogeManager', async([alice, bob, admin, dev, minter]) => {
         await this.magicStoneController.buyStone({from: alice, value: priceStone});
 
         await this.magicStoneController.setAutoFight(tokenId, 1, 0, { from : alice});
+
+        await time.increase(time.duration.days(1));
+
         result = await this.magicStoneController.getAutoFightResults(tokenId, {from: alice});
         console.log(result.logs[0].args);
 
